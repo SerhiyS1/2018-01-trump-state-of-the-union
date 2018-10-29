@@ -1,0 +1,48 @@
+---
+title: "SOTU-10-29"
+author: "Serhiy Sokhan"
+date: "10/29/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(readr)
+library(dplyr)
+library(stringr)
+library(lubridate)
+library(tidyr)
+library(tidytext)
+library(quanteda)
+library(ggplot2)
+library(DT)
+```
+
+
+
+```{r, results="hide", warning=FALSE, message=FALSE}
+# load data
+sou <- read_csv("data/sou.csv")
+presidents <- read_csv("data/presidents.csv")
+
+sou <- sou %>%
+  left_join(presidents)
+
+```
+
+```{r, message=FALSE, error=FALSE}
+tidy_sou1 <- sou %>%
+  unnest_tokens(word, text)
+
+```
+
+```{r, message=FALSE, error=FALSE, results="hide"}
+tidy_sou1 %>%
+  inner_join(get_sentiments("afinn"))%>%
+  group_by(president, date) %>%
+  summarize(rating = mean(score)) %>%
+  arrange(desc(rating)) %>%
+  ggplot(aes(x = date, y= rating)) + geom_line() + geom_smooth() +xlab("Year") + ylab("Rating") + ggtitle("Positive Sentiment Rating of SOTU Speeches Over Time")
+  
+```
+
